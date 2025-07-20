@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smit-api
+  namespace: default
+  labels:
+    app: smit-api
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: smit-api
+  template:
+    metadata:
+      labels:
+        app: smit-api
+        version: v1
+    spec:
+      containers:
+      - name: smit-api
+        image: docker.io/jargokoster/smit:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 1234
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVER_PORT
+          value: "1234"
+        - name: DATA_FILE_PATH
+          value: "/app/data/data.json"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 1234
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 1234
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+      volumes:
+      - name: data-volume
+        configMap:
+          name: smit-api-data
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smit-api-data
+  namespace: default
+data:
+  data.json: |
+    {
+      "vlans": []
+    }

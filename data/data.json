@@ -1,0 +1,14 @@
+{
+  "vlans": [
+    {
+      "id": 100,
+      "name": "Production VLAN",
+      "vlan_id": 100,
+      "subnet": "192.168.200.0/24",
+      "gateway": "192.168.200.1",
+      "status": "active",
+      "created_at": "2024-07-15T11:00:00Z",
+      "updated_at": "2024-07-15T11:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,347 @@
+openapi: 3.0.3
+info:
+  title: SMIT Network API
+  description: REST API for SMIT network management
+  version: 1.0.0
+  contact:
+    name: Jargo Kõster
+    email: jargo@koster.ee
+
+servers:
+  - url: http://localhost:1234
+    description: Development server
+  - url: http://smit.live.local
+    description: Live server
+
+paths:
+  /api/v1/vlans:
+    get:
+      summary: GET VLAN's list
+      description: Retrieve a list of all configured VLANs
+      operationId: getVlans
+      responses:
+        '200':
+          description: List of VLANs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VLANModel'
+        '400': { "$ref": "#/components/responses/BadRequest" }
+        '403': { "$ref": "#/components/responses/Forbidden" }
+        '404': { "$ref": "#/components/responses/NotFound" }
+        '405': { "$ref": "#/components/responses/MethodNotAllowed" }
+        '409': { "$ref": "#/components/responses/Conflict" }
+        '500': { "$ref": "#/components/responses/InternalServerError" }
+        '501': { "$ref": "#/components/responses/NotImplemented" }
+
+    post:
+      summary: Create a new VLAN
+      description: Create a new VLAN configuration
+      operationId: createVlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VLANInput'
+      responses:
+        '201':
+          description: VLAN created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VLANModel'
+        '400': { "$ref": "#/components/responses/BadRequest" }
+        '403': { "$ref": "#/components/responses/Forbidden" }
+        '404': { "$ref": "#/components/responses/NotFound" }
+        '405': { "$ref": "#/components/responses/MethodNotAllowed" }
+        '409': { "$ref": "#/components/responses/Conflict" }
+        '500': { "$ref": "#/components/responses/InternalServerError" }
+        '501': { "$ref": "#/components/responses/NotImplemented" }
+
+  /api/v1/vlans/{id}:
+    get:
+      summary: Get VLAN by ID
+      description: Get specific VLAN configuration
+      operationId: getVlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: VLAN ID
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4094
+      responses:
+        '200':
+          description: VLAN details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VLANModel'
+        '400': { "$ref": "#/components/responses/BadRequest" }
+        '403': { "$ref": "#/components/responses/Forbidden" }
+        '404': { "$ref": "#/components/responses/NotFound" }
+        '405': { "$ref": "#/components/responses/MethodNotAllowed" }
+        '409': { "$ref": "#/components/responses/Conflict" }
+        '500': { "$ref": "#/components/responses/InternalServerError" }
+        '501': { "$ref": "#/components/responses/NotImplemented" }
+
+    put:
+      summary: Update VLAN
+      description: Update existing VLAN configuration
+      operationId: updateVlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: VLAN ID
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4094
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VLANInput'
+      responses:
+        '200':
+          description: VLAN updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VLANModel'
+        '400': { "$ref": "#/components/responses/BadRequest" }
+        '403': { "$ref": "#/components/responses/Forbidden" }
+        '404': { "$ref": "#/components/responses/NotFound" }
+        '405': { "$ref": "#/components/responses/MethodNotAllowed" }
+        '409': { "$ref": "#/components/responses/Conflict" }
+        '500': { "$ref": "#/components/responses/InternalServerError" }
+        '501': { "$ref": "#/components/responses/NotImplemented" }
+
+    delete:
+      summary: Delete VLAN
+      description: Delete VLAN configuration
+      operationId: deleteVlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: VLAN ID
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4094
+      responses:
+        '204':
+          description: VLAN deleted successfully
+        '400': { "$ref": "#/components/responses/BadRequest" }
+        '403': { "$ref": "#/components/responses/Forbidden" }
+        '404': { "$ref": "#/components/responses/NotFound" }
+        '405': { "$ref": "#/components/responses/MethodNotAllowed" }
+        '409': { "$ref": "#/components/responses/Conflict" }
+        '500': { "$ref": "#/components/responses/InternalServerError" }
+        '501': { "$ref": "#/components/responses/NotImplemented" }
+
+  /health:
+    get:
+      summary: Health check
+      description: API health status
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '400': { "$ref": "#/components/responses/BadRequest" }
+        '403': { "$ref": "#/components/responses/Forbidden" }
+        '404': { "$ref": "#/components/responses/NotFound" }
+        '405': { "$ref": "#/components/responses/MethodNotAllowed" }
+        '409': { "$ref": "#/components/responses/Conflict" }
+        '500': { "$ref": "#/components/responses/InternalServerError" }
+        '501': { "$ref": "#/components/responses/NotImplemented" }
+
+components:
+  schemas:
+    VLANModel:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          maximum: 4094
+          description: VLAN ID (1-4094)
+          example: 100
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: VLAN name
+          example: "Production"
+        vlan_id:
+          type: integer
+          minimum: 1
+          maximum: 4094
+          description: VLAN tag ID
+          example: 100
+        subnet:
+          type: string
+          pattern: '^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$'
+          description: Subnet in CIDR notation
+          example: "192.168.1.0/24"
+        gateway:
+          type: string
+          pattern: '^(\d{1,3}\.){3}\d{1,3}$'
+          description: Gateway IP address
+          example: "192.168.1.1"
+        status:
+          type: string
+          enum: ["active", "inactive", "maintenance"]
+          description: VLAN status
+          example: "active"
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2024-01-15T10:30:00Z"
+      required:
+        - id
+        - name
+        - vlan_id
+        - subnet
+        - gateway
+        - status
+
+    VLANInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: VLAN name
+          example: "Production"
+        vlan_id:
+          type: integer
+          minimum: 1
+          maximum: 4094
+          description: VLAN tag ID
+          example: 100
+        subnet:
+          type: string
+          pattern: '^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$'
+          description: Subnet in CIDR notation
+          example: "192.168.1.0/24"
+        gateway:
+          type: string
+          pattern: '^(\d{1,3}\.){3}\d{1,3}$'
+          description: Gateway IP address
+          example: "192.168.1.1"
+        status:
+          type: string
+          enum: ["active", "inactive", "maintenance"]
+          description: VLAN status
+          example: "active"
+      required:
+        - name
+        - vlan_id
+        - subnet
+        - gateway
+        - status
+
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["healthy", "unhealthy"]
+          description: Application health status
+          example: "healthy"
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+          example: "2024-01-15T10:30:00Z"
+        version:
+          type: string
+          description: Application version
+          example: "1.0.0"
+      required:
+        - status
+        - timestamp
+        
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - timestamp
+      properties:
+        error:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          format: date-time
+          description: Time the error occurred
+          
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    MethodNotAllowed:
+      description: Method not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotImplemented:
+      description: Not implemented
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
