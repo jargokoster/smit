@@ -144,10 +144,6 @@ jobs:
           kubectl apply -f kubernetes/service.yaml -n ${{ env.KUBERNETES_NAMESPACE }}
         fi
 
-    - name: Wait for rollout
-      run: |
-        kubectl rollout status deployment/smit-api -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=5m
-
     - name: Verify deployment
       run: |
         kubectl get pods -n ${{ env.KUBERNETES_NAMESPACE }} -l app=smit-api
