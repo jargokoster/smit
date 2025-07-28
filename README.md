@@ -37,6 +37,7 @@ SMIT Network API is a RESTful service for managing VLANs (Virtual Local Area Net
 - Docker (for containerization)
 - Kubernetes cluster (for deployment)
 - GitHub account (for CI/CD)
+- DigitalOcean account (for CI/CD kubernetes)
 
 ## Project Structure
 
@@ -255,6 +256,8 @@ The GitHub Actions pipeline consists of four stages:
    - `DOCKER_USERNAME`: Docker Hub username
    - `DOCKER_PASSWORD`: Docker Hub password
    - `KUBE_CONFIG`: Base64-encoded kubeconfig
+   - `DIGITALOCEAN_ACCESS_TOKEN`: DigitalOcean token
+   - `DIGITALOCEAN_CLUSTER_ID`: DigitalOcean cluster ID
 
 2. **Trigger Pipeline:**
    - Push to main/develop branches
