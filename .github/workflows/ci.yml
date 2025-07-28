@@ -117,36 +117,29 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker
     if: github.ref == 'refs/heads/main'
-    env:
-      KUBECONFIG: ${{ github.workspace }}/kubeconfig
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Kubectl
-      uses: azure/setup-kubectl@v4
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
       with:
-        version: 'latest'
+        token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-    - name: Configure kubectl
-      run: |
-        echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > ${{ github.workspace }}/kubeconfig
-        chmod 600 ${{ github.workspace }}/kubeconfig
-        
-    - name: Test kubectl connection
-      run: |
-        kubectl version --client
-        kubectl cluster-info
-        kubectl get nodes
+    - name: Save DigitalOcean kubeconfig
+      run: doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_ID }}
 
-    - name: Check if deployment exists
+    - name: Deploy to Kubernetes
       run: |
-        if kubectl get deployment smit-api -n ${{ env.KUBERNETES_NAMESPACE }}; then
-          echo "Deployment exists, updating..."
+        # Check if deployment exists
+        if kubectl get deployment smit-api -n ${{ env.KUBERNETES_NAMESPACE }} 2>/dev/null; then
+          echo "Updating existing deployment..."
           kubectl set image deployment/smit-api smit-api=${{ env.DOCKER_IMAGE }}:${{ github.sha }} -n ${{ env.KUBERNETES_NAMESPACE }}
         else
-          echo "Deployment doesn't exist, applying manifests..."
+          echo "Creating new deployment..."
+          # Update the image in the yaml files
+          sed -i "s|docker.io/jargokoster/smit:latest|${{ env.DOCKER_IMAGE }}:${{ github.sha }}|g" kubernetes/deployment.yaml
           kubectl apply -f kubernetes/deployment.yaml -n ${{ env.KUBERNETES_NAMESPACE }}
           kubectl apply -f kubernetes/service.yaml -n ${{ env.KUBERNETES_NAMESPACE }}
         fi
@@ -159,4 +152,3 @@ jobs:
       run: |
         kubectl get pods -n ${{ env.KUBERNETES_NAMESPACE }} -l app=smit-api
         kubectl get services -n ${{ env.KUBERNETES_NAMESPACE }} -l app=smit-api
-        kubectl describe deployment smit-api -n ${{ env.KUBERNETES_NAMESPACE }}
